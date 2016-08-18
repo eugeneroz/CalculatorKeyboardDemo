@@ -1,4 +1,4 @@
-package com.eugene.calckeyboard;
+package com.eugene.keyboard;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

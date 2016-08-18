@@ -1,0 +1,26 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.eugene.keyboard"
+        >
+
+    <application
+            android:allowBackup="true"
+            android:supportsRtl="true"
+            android:hardwareAccelerated="true"
+            >
+
+        <service
+                android:label="@string/ime_name"
+                android:name="com.eugene.keyboard.CalculatorInputMethod"
+                android:permission="android.permission.BIND_INPUT_METHOD"
+                >
+            <intent-filter>
+                <action android:name="android.view.InputMethod"/>
+            </intent-filter>
+            <meta-data
+                    android:name="android.view.im"
+                    android:resource="@xml/input_method"
+                    />
+        </service>
+    </application>
+
+</manifest>
