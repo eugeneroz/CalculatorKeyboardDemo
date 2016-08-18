@@ -1,1 +1,1 @@
-include ':demo', ':calckeyboardlib'
+include ':demo', ':keyboard_lib'
