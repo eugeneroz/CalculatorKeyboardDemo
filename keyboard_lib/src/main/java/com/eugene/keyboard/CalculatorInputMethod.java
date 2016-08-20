@@ -1,5 +1,6 @@
 package com.eugene.keyboard;
 
+import android.content.res.Configuration;
 import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.KeyboardView;
 import android.util.Log;
@@ -33,17 +34,25 @@ public class CalculatorInputMethod extends InputMethodService
         super();
     }
 
+    @Override public void onCreate() {
+        super.onCreate();
+        historyAdapter = new ArrayAdapter<>(this, R.layout.history_item, new LinkedList());
+    }
+
     @Override public void onInitializeInterface() {
         super.onInitializeInterface();
 
         mCalculatorKeyboard = new CalculatorKeyboard(this, R.xml.calculator);
     }
 
+    @Override public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        showHistory = false;
+    }
+
     @Override public View onCreateCandidatesView() {
         ListViewMaxHeight listView =
                 (ListViewMaxHeight) getLayoutInflater().inflate(R.layout.history, null);
-
-        historyAdapter = new ArrayAdapter<>(this, R.layout.history_item, new LinkedList());
 
         listView.setAdapter(historyAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
