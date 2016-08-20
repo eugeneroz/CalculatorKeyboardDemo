@@ -11,4 +11,8 @@ public class DivisionExpression extends ArithmeticExpression {
     @Override public int calculate() {
         return leftOperand.calculate() / rightOperand.calculate();
     }
+
+    @Override char getOperator() {
+        return '/';
+    }
 }

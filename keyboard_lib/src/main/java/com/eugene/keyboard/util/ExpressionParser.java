@@ -19,7 +19,8 @@ public class ExpressionParser {
         try {
             Operand leftOperand = new Operand(Integer.valueOf(expressionArr[0]));
             Operand rightOperand = new Operand(Integer.valueOf(expressionArr[2]));
-            result = ArithmeticExpression.getArithmeticExpression(expressionArr[1], leftOperand,
+            result = ArithmeticExpression.getArithmeticExpression(expressionArr[1].charAt(0),
+                    leftOperand,
                     rightOperand);
         } catch (NumberFormatException exception) {
             throw new ArithmeticException("Arithmetic expression is invalid");

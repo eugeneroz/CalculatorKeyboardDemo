@@ -4,12 +4,15 @@ import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.KeyboardView;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import com.eugene.keyboard.math.ArithmeticException;
 import com.eugene.keyboard.math.Expression;
 import com.eugene.keyboard.util.ExpressionParser;
+import com.eugene.keyboard.view.ListViewMaxHeight;
+import java.util.LinkedList;
 
 /**
  * Created by eugene on 18/08/2016.
@@ -23,10 +26,60 @@ public class CalculatorInputMethod extends InputMethodService
     private CalculatorKeyboard mCalculatorKeyboard;
     private KeyboardView mInputView;
 
+    private ArrayAdapter<Expression> historyAdapter;
+    private boolean showHistory = false;
+
+    public CalculatorInputMethod() {
+        super();
+    }
+
     @Override public void onInitializeInterface() {
         super.onInitializeInterface();
 
         mCalculatorKeyboard = new CalculatorKeyboard(this, R.xml.calculator);
+    }
+
+    @Override public View onCreateCandidatesView() {
+        ListViewMaxHeight listView =
+                (ListViewMaxHeight) getLayoutInflater().inflate(R.layout.history, null);
+
+        historyAdapter = new ArrayAdapter<>(this, R.layout.history_item, new LinkedList());
+
+        listView.setAdapter(historyAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                Log.d(TAG, "onItemClick(): position = " + position);
+                setText(String.valueOf(historyAdapter.getItem(position).calculate()));
+
+                displayHistory(false);
+            }
+        });
+
+        return listView;
+    }
+
+    private void displayHistory(boolean show) {
+        showHistory = show;
+        setCandidatesViewShown(showHistory);
+    }
+
+    @Override public int getCandidatesHiddenVisibility() {
+        return View.GONE;
+    }
+
+    private void setText(String newText) {
+        InputConnection inputConnection = getCurrentInputConnection();
+        String text =
+                inputConnection.getExtractedText(new ExtractedTextRequest(), 0).text.toString();
+
+        CharSequence beforeCursorText = inputConnection.getTextBeforeCursor(text.length(), 0);
+        CharSequence afterCursorText = inputConnection.getTextAfterCursor(text.length(), 0);
+        inputConnection.beginBatchEdit();
+        inputConnection.deleteSurroundingText(beforeCursorText.length(), afterCursorText.length());
+        inputConnection.setComposingText(newText, 1);
+        inputConnection.endBatchEdit();
+        inputConnection.finishComposingText();
     }
 
     @Override public View onCreateInputView() {
@@ -38,20 +91,12 @@ public class CalculatorInputMethod extends InputMethodService
         return mInputView;
     }
 
-    @Override public void onStartInputView(EditorInfo info, boolean restarting) {
-        super.onStartInputView(info, restarting);
-    }
+    @Override public void onComputeInsets(Insets outInsets) {
+        super.onComputeInsets(outInsets);
 
-    @Override public void onFinishInputView(boolean finishingInput) {
-        super.onFinishInputView(finishingInput);
-    }
-
-    @Override public void onStartCandidatesView(EditorInfo info, boolean restarting) {
-        super.onStartCandidatesView(info, restarting);
-    }
-
-    @Override public void onFinishCandidatesView(boolean finishingInput) {
-        super.onFinishCandidatesView(finishingInput);
+        if (!isFullscreenMode()) {
+            outInsets.contentTopInsets = outInsets.visibleTopInsets;
+        }
     }
 
     @Override public void onPress(int i) {
@@ -67,31 +112,29 @@ public class CalculatorInputMethod extends InputMethodService
         InputConnection inputConnection = getCurrentInputConnection();
         switch (primaryCode) {
             case ASSIGNMENT:
-                String text = inputConnection.getExtractedText(new ExtractedTextRequest(),
-                        0).text.toString();
-                Expression expression;
+                if (!showHistory) {
+                    String text = inputConnection.getExtractedText(new ExtractedTextRequest(),
+                            0).text.toString();
 
-                try {
-                    expression = ExpressionParser.parseExpression(text);
+                    try {
+                        Expression expression = ExpressionParser.parseExpression(text);
 
-                    CharSequence beforeCursorText =
-                            inputConnection.getTextBeforeCursor(text.length(), 0);
-                    CharSequence afterCursorText =
-                            inputConnection.getTextAfterCursor(text.length(), 0);
-                    inputConnection.beginBatchEdit();
-                    inputConnection.deleteSurroundingText(beforeCursorText.length(),
-                            afterCursorText.length());
-                    inputConnection.setComposingText(String.valueOf(expression.calculate()), 1);
-                    inputConnection.endBatchEdit();
-                } catch (ArithmeticException e) {
+                        setText(String.valueOf(expression.calculate()));
+                        historyAdapter.add(expression);
+                    } catch (ArithmeticException e) {
+                    }
+
+                    Log.d(TAG, "onKey: assignment text is '" + text + "'");
                 }
-
-                Log.d(TAG, "onKey: assignment text is '" + text + "'");
-
+                break;
+            case HISTORY:
+                displayHistory(!showHistory);
                 break;
             default:
-                String newText = String.valueOf((char) primaryCode);
-                inputConnection.commitText(newText, 1);
+                if (!showHistory) {
+                    String newText = String.valueOf((char) primaryCode);
+                    inputConnection.commitText(newText, 1);
+                }
                 break;
         }
     }

@@ -12,17 +12,17 @@ public abstract class ArithmeticExpression implements Expression {
         this.rightOperand = rightOperand;
     }
 
-    public static final ArithmeticExpression getArithmeticExpression(String operator,
+    public static final ArithmeticExpression getArithmeticExpression(char operator,
             Operand leftOperand, Operand rightOperand) {
         ArithmeticExpression result;
 
-        if (operator.equals("+")) {
+        if (operator == '+') {
             result = new AdditionExpression(leftOperand, rightOperand);
-        } else if (operator.equals("-")) {
-            result = new SubstractionExpression(leftOperand, rightOperand);
-        } else if (operator.equals("*")) {
+        } else if (operator == '-') {
+            result = new SubtractionExpression(leftOperand, rightOperand);
+        } else if (operator == '*') {
             result = new MultiplicationExpression(leftOperand, rightOperand);
-        } else if (operator.equals("/")) {
+        } else if (operator == '/') {
             result = new DivisionExpression(leftOperand, rightOperand);
         } else {
             throw new IllegalStateException("Illegal arithmetic operator");
@@ -32,6 +32,8 @@ public abstract class ArithmeticExpression implements Expression {
     }
 
     public abstract int calculate();
+
+    abstract char getOperator();
 
     @Override public boolean isValid() {
         return leftOperand != null && rightOperand != null;
@@ -51,5 +53,10 @@ public abstract class ArithmeticExpression implements Expression {
         int result = leftOperand.hashCode();
         result = 31 * result + rightOperand.hashCode();
         return result;
+    }
+
+    @Override public String toString() {
+        return String.valueOf(leftOperand.calculate()) + getOperator() + String.valueOf(
+                rightOperand.calculate()) + '=' + String.valueOf(calculate());
     }
 }
