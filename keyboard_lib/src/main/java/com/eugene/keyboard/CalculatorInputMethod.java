@@ -1,18 +1,22 @@
 package com.eugene.keyboard;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.res.Configuration;
 import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.KeyboardView;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
+import android.widget.ListView;
 import com.eugene.keyboard.math.ArithmeticException;
 import com.eugene.keyboard.math.Expression;
 import com.eugene.keyboard.util.ExpressionParser;
-import com.eugene.keyboard.view.ListViewMaxHeight;
+import com.eugene.keyboard.util.SizeUtils;
 import java.util.LinkedList;
 
 /**
@@ -20,15 +24,16 @@ import java.util.LinkedList;
  */
 public class CalculatorInputMethod extends InputMethodService
         implements KeyboardView.OnKeyboardActionListener {
+    public static final int HISTORY_HEIGHT_DP = 120;
     private static final String TAG = CalculatorInputMethod.class.getSimpleName();
     private static final int ASSIGNMENT = 61;
     private static final int HISTORY = 72;
-
     private CalculatorKeyboard mCalculatorKeyboard;
     private KeyboardView mInputView;
 
-    private ArrayAdapter<Expression> historyAdapter;
+    private HistoryAdapter historyAdapter;
     private boolean showHistory = false;
+    private FrameLayout mCandidatesFrame;
 
     public CalculatorInputMethod() {
         super();
@@ -36,7 +41,19 @@ public class CalculatorInputMethod extends InputMethodService
 
     @Override public void onCreate() {
         super.onCreate();
-        historyAdapter = new ArrayAdapter<>(this, R.layout.history_item, new LinkedList());
+        historyAdapter = new HistoryAdapter(this, R.layout.history_item, new LinkedList());
+
+        historyAdapter.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                int position = (int) v.getTag();
+                Log.d(TAG, "onClick(): position = " + position);
+                setText(String.valueOf(historyAdapter.getItem(position).calculate()));
+
+                displayHistory(false);
+            }
+        });
+        View rootView = getWindow().getWindow().getDecorView();
+        mCandidatesFrame = (FrameLayout) rootView.findViewById(android.R.id.candidatesArea);
     }
 
     @Override public void onInitializeInterface() {
@@ -51,26 +68,47 @@ public class CalculatorInputMethod extends InputMethodService
     }
 
     @Override public View onCreateCandidatesView() {
-        ListViewMaxHeight listView =
-                (ListViewMaxHeight) getLayoutInflater().inflate(R.layout.history, null);
+        final ListView listView = (ListView) getLayoutInflater().inflate(R.layout.history, null);
 
         listView.setAdapter(historyAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                Log.d(TAG, "onItemClick(): position = " + position);
-                setText(String.valueOf(historyAdapter.getItem(position).calculate()));
-
-                displayHistory(false);
-            }
-        });
 
         return listView;
     }
 
+    @Override public void setCandidatesView(View view) {
+        mCandidatesFrame.removeAllViews();
+        mCandidatesFrame.addView(view,
+                new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        SizeUtils.dpToPx(this, HISTORY_HEIGHT_DP)));
+    }
+
     private void displayHistory(boolean show) {
         showHistory = show;
-        setCandidatesViewShown(showHistory);
+
+        if (showHistory) {
+            setCandidatesViewShown(showHistory);
+
+            mCandidatesFrame.animate()
+                    .alpha(1.0f)
+                    .setDuration(500)
+                    .setInterpolator(new AccelerateInterpolator())
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                        }
+                    });
+        } else {
+            mCandidatesFrame.animate()
+                    .alpha(0.0f)
+                    .setDuration(500)
+                    .setInterpolator(new AccelerateInterpolator())
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            setCandidatesViewShown(showHistory);
+                        }
+                    });
+        }
     }
 
     @Override public int getCandidatesHiddenVisibility() {
@@ -137,7 +175,9 @@ public class CalculatorInputMethod extends InputMethodService
                 }
                 break;
             case HISTORY:
-                displayHistory(!showHistory);
+                if (historyAdapter.getCount() > 0) {
+                    displayHistory(!showHistory);
+                }
                 break;
             default:
                 if (!showHistory) {
