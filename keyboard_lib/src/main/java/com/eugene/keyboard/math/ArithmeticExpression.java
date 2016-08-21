@@ -4,6 +4,10 @@ package com.eugene.keyboard.math;
  * Created by eugene on 18/08/2016.
  */
 public abstract class ArithmeticExpression implements Expression {
+    static {
+        System.loadLibrary("math-jni");
+    }
+
     Operand leftOperand;
     Operand rightOperand;
 

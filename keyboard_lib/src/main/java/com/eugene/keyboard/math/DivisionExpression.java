@@ -8,8 +8,10 @@ public class DivisionExpression extends ArithmeticExpression {
         super(leftOperand, rightOperand);
     }
 
+    native int division(int leftOperand, int rightOperand);
+
     @Override public int calculate() {
-        return leftOperand.calculate() / rightOperand.calculate();
+        return division(leftOperand.calculate(), rightOperand.calculate());
     }
 
     @Override char getOperator() {
