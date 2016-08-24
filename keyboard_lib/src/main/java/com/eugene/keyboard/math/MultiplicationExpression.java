@@ -12,7 +12,7 @@ public class MultiplicationExpression extends ArithmeticExpression {
     native int multiplication(int leftOperand, int rightOperand);
 
     @Override public int calculate() {
-        return multiplication(leftOperand.calculate(), rightOperand.calculate());
+        return multiplication(mLeftOperand.calculate(), mRightOperand.calculate());
     }
 
     @Override char getOperator() {

@@ -12,7 +12,7 @@ public class AdditionExpression extends ArithmeticExpression {
     native int addition(int leftOperand, int rightOperand);
 
     @Override public int calculate() {
-        return addition(leftOperand.calculate(), rightOperand.calculate());
+        return addition(mLeftOperand.calculate(), mRightOperand.calculate());
     }
 
     @Override char getOperator() {

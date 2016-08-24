@@ -11,7 +11,7 @@ public class DivisionExpression extends ArithmeticExpression {
     native int division(int leftOperand, int rightOperand);
 
     @Override public int calculate() {
-        return division(leftOperand.calculate(), rightOperand.calculate());
+        return division(mLeftOperand.calculate(), mRightOperand.calculate());
     }
 
     @Override char getOperator() {

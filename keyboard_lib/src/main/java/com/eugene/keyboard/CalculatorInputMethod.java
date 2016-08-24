@@ -31,8 +31,8 @@ public class CalculatorInputMethod extends InputMethodService
     private CalculatorKeyboard mCalculatorKeyboard;
     private KeyboardView mInputView;
 
-    private HistoryAdapter historyAdapter;
-    private boolean showHistory = false;
+    private HistoryAdapter mHistoryAdapter;
+    private boolean mShowHistory = false;
     private FrameLayout mCandidatesFrame;
 
     public CalculatorInputMethod() {
@@ -41,13 +41,13 @@ public class CalculatorInputMethod extends InputMethodService
 
     @Override public void onCreate() {
         super.onCreate();
-        historyAdapter = new HistoryAdapter(this, R.layout.history_item, new LinkedList());
+        mHistoryAdapter = new HistoryAdapter(this, R.layout.history_item, new LinkedList());
 
-        historyAdapter.setOnClickListener(new View.OnClickListener() {
+        mHistoryAdapter.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 int position = (int) v.getTag();
                 Log.d(TAG, "onClick(): position = " + position);
-                setText(String.valueOf(historyAdapter.getItem(position).calculate()));
+                setText(String.valueOf(mHistoryAdapter.getItem(position).calculate()));
 
                 displayHistory(false);
             }
@@ -64,13 +64,13 @@ public class CalculatorInputMethod extends InputMethodService
 
     @Override public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        showHistory = false;
+        mShowHistory = false;
     }
 
     @Override public View onCreateCandidatesView() {
         final ListView listView = (ListView) getLayoutInflater().inflate(R.layout.history, null);
 
-        listView.setAdapter(historyAdapter);
+        listView.setAdapter(mHistoryAdapter);
 
         return listView;
     }
@@ -83,10 +83,10 @@ public class CalculatorInputMethod extends InputMethodService
     }
 
     private void displayHistory(boolean show) {
-        showHistory = show;
+        mShowHistory = show;
 
-        if (showHistory) {
-            setCandidatesViewShown(showHistory);
+        if (mShowHistory) {
+            setCandidatesViewShown(mShowHistory);
 
             mCandidatesFrame.animate()
                     .alpha(1.0f)
@@ -105,7 +105,7 @@ public class CalculatorInputMethod extends InputMethodService
                     .setListener(new AnimatorListenerAdapter() {
                         @Override public void onAnimationEnd(Animator animation) {
                             super.onAnimationEnd(animation);
-                            setCandidatesViewShown(showHistory);
+                            setCandidatesViewShown(mShowHistory);
                         }
                     });
         }
@@ -159,7 +159,7 @@ public class CalculatorInputMethod extends InputMethodService
         InputConnection inputConnection = getCurrentInputConnection();
         switch (primaryCode) {
             case ASSIGNMENT:
-                if (!showHistory) {
+                if (!mShowHistory) {
                     String text = inputConnection.getExtractedText(new ExtractedTextRequest(),
                             0).text.toString();
 
@@ -167,7 +167,7 @@ public class CalculatorInputMethod extends InputMethodService
                         Expression expression = ExpressionParser.parseExpression(text);
 
                         setText(String.valueOf(expression.calculate()));
-                        historyAdapter.add(expression);
+                        mHistoryAdapter.add(expression);
                     } catch (ArithmeticException e) {
                     }
 
@@ -175,12 +175,12 @@ public class CalculatorInputMethod extends InputMethodService
                 }
                 break;
             case HISTORY:
-                if (historyAdapter.getCount() > 0) {
-                    displayHistory(!showHistory);
+                if (mHistoryAdapter.getCount() > 0) {
+                    displayHistory(!mShowHistory);
                 }
                 break;
             default:
-                if (!showHistory) {
+                if (!mShowHistory) {
                     String newText = String.valueOf((char) primaryCode);
                     inputConnection.commitText(newText, 1);
                 }

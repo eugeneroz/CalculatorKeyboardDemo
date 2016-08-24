@@ -12,7 +12,7 @@ public class SubtractionExpression extends ArithmeticExpression {
     native int subtraction(int leftOperand, int rightOperand);
 
     @Override public int calculate() {
-        return subtraction(leftOperand.calculate(), rightOperand.calculate());
+        return subtraction(mLeftOperand.calculate(), mRightOperand.calculate());
     }
 
     @Override char getOperator() {

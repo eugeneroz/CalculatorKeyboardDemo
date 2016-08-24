@@ -4,14 +4,14 @@ package com.eugene.keyboard.math;
  * Created by eugene on 18/08/2016.
  */
 public class Operand implements Expression {
-    int value;
+    int mValue;
 
     public Operand(int value) {
-        this.value = value;
+        this.mValue = value;
     }
 
     @Override public int calculate() {
-        return value;
+        return mValue;
     }
 
     @Override public boolean isValid() {
@@ -24,14 +24,14 @@ public class Operand implements Expression {
 
         Operand operand = (Operand) o;
 
-        return value == operand.value;
+        return mValue == operand.mValue;
     }
 
     @Override public int hashCode() {
-        return value;
+        return mValue;
     }
 
     @Override public String toString() {
-        return String.valueOf(value);
+        return String.valueOf(mValue);
     }
 }

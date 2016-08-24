@@ -8,12 +8,12 @@ public abstract class ArithmeticExpression implements Expression {
         System.loadLibrary("math-jni");
     }
 
-    Operand leftOperand;
-    Operand rightOperand;
+    Operand mLeftOperand;
+    Operand mRightOperand;
 
     public ArithmeticExpression(Operand leftOperand, Operand rightOperand) {
-        this.leftOperand = leftOperand;
-        this.rightOperand = rightOperand;
+        this.mLeftOperand = leftOperand;
+        this.mRightOperand = rightOperand;
     }
 
     public static final ArithmeticExpression getArithmeticExpression(char operator,
@@ -40,7 +40,7 @@ public abstract class ArithmeticExpression implements Expression {
     abstract char getOperator();
 
     @Override public boolean isValid() {
-        return leftOperand != null && rightOperand != null;
+        return mLeftOperand != null && mRightOperand != null;
     }
 
     @Override public boolean equals(Object o) {
@@ -49,18 +49,18 @@ public abstract class ArithmeticExpression implements Expression {
 
         ArithmeticExpression that = (ArithmeticExpression) o;
 
-        if (!leftOperand.equals(that.leftOperand)) return false;
-        return rightOperand.equals(that.rightOperand);
+        if (!mLeftOperand.equals(that.mLeftOperand)) return false;
+        return mRightOperand.equals(that.mRightOperand);
     }
 
     @Override public int hashCode() {
-        int result = leftOperand.hashCode();
-        result = 31 * result + rightOperand.hashCode();
+        int result = mLeftOperand.hashCode();
+        result = 31 * result + mRightOperand.hashCode();
         return result;
     }
 
     @Override public String toString() {
-        return String.valueOf(leftOperand.calculate()) + getOperator() + String.valueOf(
-                rightOperand.calculate()) + '=' + String.valueOf(calculate());
+        return String.valueOf(mLeftOperand.calculate()) + getOperator() + String.valueOf(
+                mRightOperand.calculate()) + '=' + String.valueOf(calculate());
     }
 }
